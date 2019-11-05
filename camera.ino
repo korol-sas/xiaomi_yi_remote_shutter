@@ -8,6 +8,7 @@ bool isVideoMode = false;
 bool isRecording = false;
 String token = "";
 unsigned long lastActionTime = 0;
+unsigned long lastPhotoTime = 0;
 
 void setWiFiSettings() {
   // Set WiFi to station mode and disconnect from an AP if it was previously connected
@@ -161,13 +162,18 @@ void clearIncoming() {
 }
 
 void takePhoto(String token) {
-  clearIncoming();
-
-  client.print("{\"msg_id\":769,\"token\":");
-  client.print(token);
-  client.print("}\n\r");
-
-  clearIncoming();
+  unsigned long now = millis();
+  if (now - lastPhotoTime > (1500)) {
+    lastPhotoTime = millis();
+  
+    clearIncoming();
+  
+    client.print("{\"msg_id\":769,\"token\":");
+    client.print(token);
+    client.print("}\n\r");
+  
+    clearIncoming();
+  }
 }
 
 void startRecording(String token) {
@@ -194,11 +200,11 @@ void stopRecording(String token) {
   isRecording = false;
 }
 
-void setVideoMode(String token) {
+void setVideoMode() {
   isVideoMode = true;
 }
 
-void setPhotoMode(String token) {
+void setPhotoMode() {
   if (isVideoMode && isRecording ) {
      stopRecording(token);
   }
@@ -218,6 +224,10 @@ void keepalive(String token) {
   clearIncoming();
 }
 
+bool isVideoModeCurrent() {
+  return isVideoMode;
+}
+
 void loopCommands() {
   if (Serial.available() > 0) {
     String cmd = Serial.readStringUntil('\n');
@@ -228,10 +238,10 @@ void loopCommands() {
       fetchDeviceMode(token);
     }
     if (cmd == "set_video") {
-      setVideoMode(token);
+      setVideoMode();
     }
     if (cmd == "set_photo") {
-      setPhotoMode(token);
+      setPhotoMode();
     }
     if (cmd == "trigger_rc") {
       

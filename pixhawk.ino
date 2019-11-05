@@ -83,7 +83,7 @@ void loopPixhawk()
   if (togglePixhawkNewSignal)
   {
      if( togglePixhawkValue > 1600 ) {
-        Serial.println(togglePixhawkValue); 
+        Serial.println("Tigger by Pixhawk"); 
         triggerPixhawk();
      }
      togglePixhawkNewSignal = false;
@@ -92,9 +92,23 @@ void loopPixhawk()
   if (toggleRcNewSignal)
   {
      if( toggleRcValue > 1600 ) {
-        Serial.println(toggleRcValue); 
+        Serial.println("Tigger by RC"); 
         triggerRc();
      }
      toggleRcNewSignal = false;
+  }
+
+  if (modeRcNewSignal)
+  {
+     if( modeRcValue > 1600 && !isVideoModeCurrent()) {
+        Serial.println("Change to Video mode"); 
+        setVideoMode();
+     }
+     
+     if (modeRcValue < 1600 && isVideoModeCurrent()) {
+        Serial.println("Change to Photo mode"); 
+        setPhotoMode();
+     }
+     modeRcNewSignal = false;
   }
 }
